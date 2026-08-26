@@ -16,8 +16,17 @@ TIMEOUT_MINUTES = 15
 
 def check_password():
     """Validates hashed password and enforces 15-minute idle timeout."""
+
+    if "ADMIN_PASSWORD_HASH" not in st.secrets:
+        st.error("🚨 Configuration Error: The application secrets are not properly configured on the server.")
+        st.stop()
+
     if "password_correct" not in st.session_state:
         st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        st.session_state["password_correct"] = False
+        
     if "last_activity" not in st.session_state:
         st.session_state["last_activity"] = datetime.datetime.now()
 
