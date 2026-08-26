@@ -3,6 +3,10 @@ import pandas as pd
 import datetime
 import hashlib
 import hmac
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from data_loader import load_and_clean_data
 from views.exec_overview import render_exec_overview
@@ -73,7 +77,7 @@ def render_main_dashboard():
     # ==========================================
     # LOGOUT BUTTON (Top of Sidebar)
     # ==========================================
-    if st.sidebar.button("🚪 Log Out", use_container_width=True):
+    if st.sidebar.button("🚪 Log Out", width="stretch"):
         st.session_state["password_correct"] = False
         st.rerun() # Instantly re-runs the script, kicking them to the login screen
         
@@ -84,9 +88,9 @@ def render_main_dashboard():
     # ==========================================
     col_logo, col_title = st.columns([1, 11])
     with col_logo:
-        st.image("logo.png", use_container_width=True)
+        st.image("logo.png", width="stretch")
     with col_title:
-        st.title("Naunidh Welfare Foundation — Analytical Dashboard")
+        st.title("Naunidh Welfare Foundation — Dashboard")
         st.caption("Live Operational Intelligence & Executive Impact Portal")
     st.divider()
 

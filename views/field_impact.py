@@ -1,8 +1,8 @@
 import streamlit as st
+import plotly.express as px
 
 def render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey):
     st.title("Field Operations & Community Impact")
-    st.write("Real-time metrics from the Drives Department.")
     
     completed_drives = len(df_drives[df_drives["Status"] == "Completed"])
     total_beneficiaries = int(df_drives["No. of Beneficiaries"].sum())
@@ -18,37 +18,42 @@ def render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey):
         
     st.divider()
     
+    # NEW: Beneficiaries by Location Chart
+    if not df_drives.empty:
+        loc_data = df_drives.groupby("Location")["No. of Beneficiaries"].sum().reset_index()
+        fig_loc = px.bar(
+            loc_data.sort_values("No. of Beneficiaries", ascending=False), 
+            x="Location", 
+            y="No. of Beneficiaries",
+            template="plotly_dark",
+            color_discrete_sequence=["#3498DB"],
+            title="Total Beneficiaries by Partner Location"
+        )
+        st.plotly_chart(fig_loc, use_container_width=True)
+    
     st.write("### 📋 Recent Drive Logs")
     st.dataframe(
         df_drives[["Drive ID", "Date", "Location", "Type of Care Home", "Status", "No. of Beneficiaries"]],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config={
-            "Date": st.column_config.DateColumn("Drive Date", format="MMM DD, YYYY"),
-            "Status": st.column_config.TextColumn("Status"),
-            "No. of Beneficiaries": st.column_config.NumberColumn("Beneficiaries", format="%d")
+            "Date": st.column_config.DateColumn("Drive Date", format="MMM DD, YYYY")
         }
     )
 
     st.write("---")
     st.write("### 📚 Education Department Operations")
     
-    total_students = len(df_edu_safe)
-    active_educators = df_edu_log["Educator ID"].nunique()
-    families_approached = int(df_edu_survey["Families Approached"].sum())
-    total_sessions = len(df_edu_log)
-    
     col_edu1, col_edu2, col_edu3, col_edu4 = st.columns(4)
     with col_edu1.container(border=True):
-        st.metric("Enrolled Students", f"{total_students} 🧑‍🎓")
+        st.metric("Enrolled Students", f"{len(df_edu_safe)} 🧑‍🎓")
     with col_edu2.container(border=True):
-        st.metric("Active Educators", f"{active_educators} 🧑‍🏫")
+        st.metric("Active Educators", f"{df_edu_log['Educator ID'].nunique()} 🧑‍🏫")
     with col_edu3.container(border=True):
-        st.metric("Families Approached", f"{families_approached} 🏘️")
+        st.metric("Families Approached", f"{int(df_edu_survey['Families Approached'].sum())} 🏘️")
     with col_edu4.container(border=True):
-        st.metric("Teaching Sessions", f"{total_sessions} 📝")
+        st.metric("Teaching Sessions", f"{len(df_edu_log)} 📝")
         
     st.write("#### 🧑‍🎓 Anonymized Student Roster")
-    st.caption("Privacy Notice: PII (Phone numbers, Parent Names, Addresses) are strictly masked at the database level and omitted from this portal.")
-    
-    st.dataframe(df_edu_safe, use_container_width=True, hide_index=True)
+    st.caption("Privacy Notice: PII strictly masked at the database level.")
+    st.dataframe(df_edu_safe, width="stretch", hide_index=True)
