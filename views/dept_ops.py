@@ -22,8 +22,10 @@ def render_dept_ops(df_master):
             hover_data=["Full_Name", "Volunteer ID"],
             color_discrete_map={"GOOD STANDING": "#2ECC71", "WARNING": "#F1C40F", "STRIKE": "#E74C3C"},
             template="plotly_dark",
-            title="Volunteer Engagement Matrix (Events vs. Attendance)"
+            title="Volunteer Engagement (Events vs. Attendance)"
         )
+        
+        fig_scatter.update_xaxes(dtick=1)
         st.plotly_chart(fig_scatter, use_container_width=True)
     
     st.dataframe(
