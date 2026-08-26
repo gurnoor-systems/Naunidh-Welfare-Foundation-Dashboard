@@ -1,3 +1,23 @@
+# Environments
+.env
+.venv
 venv/
+ENV/
+env.bak/
+
+# Streamlit Secrets (CRITICAL: Do not commit this file)
 .streamlit/secrets.toml
+
+# Python Cache
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# VS Code / IDEs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
