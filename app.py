@@ -17,8 +17,6 @@ TIMEOUT_MINUTES = 15
 def check_password():
     """Validates hashed password and enforces 15-minute idle timeout."""
 
-    st.info(f"Available Secret Keys: {list(st.secrets.keys())}")
-
     if "ADMIN_PASSWORD_HASH" not in st.secrets:
         st.error("🚨 Configuration Error: The application secrets are not properly configured on the server.")
         st.stop()
