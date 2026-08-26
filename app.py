@@ -15,7 +15,7 @@ st.set_page_config(
 
 col_logo, col_title = st.columns([1, 11]) # The title column is 11x wider than the logo
 with col_logo:
-    st.image("logo.png", use_container_width=True)
+    st.image("logo.png", width=True)
 with col_title:
     st.title("Naunidh Welfare Foundation — Analytical Dashboard")
     st.caption("Live Operational Intelligence & Executive Impact Portal")
@@ -192,7 +192,7 @@ with tab_exec:
         timeline_df = df_drives.groupby("Date")["No. of Beneficiaries"].sum().reset_index()
         timeline_df = timeline_df.sort_values("Date")
         timeline_df["Cumulative Beneficiaries"] = timeline_df["No. of Beneficiaries"].cumsum()
-        st.line_chart(timeline_df.set_index("Date")["Cumulative Beneficiaries"], color="#E74C3C", use_container_width=True)
+        st.line_chart(timeline_df.set_index("Date")["Cumulative Beneficiaries"], color="#E74C3C", width=True)
     else:
         st.info("No field operations data available for the selected date range.")
 
@@ -206,13 +206,13 @@ with tab_exec:
     with col_chart1.container(border=True):
             st.write("#### Roster Breakdown")
             dept_counts = df_master["Department"].value_counts()
-            st.bar_chart(dept_counts, color="#2C3E50", use_container_width=True) 
+            st.bar_chart(dept_counts, color="#2C3E50", width=True) 
             
         # Wrap the second chart in a responsive native box (Card 2)
     with col_chart2.container(border=True):
             st.write("#### Standing Status")
             status_counts = df_master["SOP_Status"].value_counts()
-            st.bar_chart(status_counts, color="#27AE60", use_container_width=True)
+            st.bar_chart(status_counts, color="#27AE60", width=True)
 
 # ------------------------------------------
 # TAB 2: DEPARTMENT OPERATIONS (FILTERED)
@@ -237,7 +237,7 @@ with tab_dept:
     # Render Clean dataframe
     st.dataframe(
         df_filtered[["Volunteer ID", "Full_Name", "Contact (Email)", "Department", "Total_Events", "Present", "Attendance_Rate", "SOP_Status"]],
-        use_container_width=True,
+        width=True,
         hide_index=True,
         column_config={
         "Volunteer ID": st.column_config.TextColumn("ID", width="small"),
@@ -272,7 +272,7 @@ with tab_hr:
         if len(df_warnings) > 0:
             st.dataframe(
                 df_warnings[["Volunteer ID", "Full_Name", "Department", "Total_Strikes", "SOP_Status"]],
-                use_container_width=True,
+                width=True,
                 hide_index=True,
                 column_config={
                     "Volunteer ID": st.column_config.TextColumn("ID"),
@@ -290,7 +290,7 @@ with tab_hr:
         df_eligible = df_master[df_master["SOP_Status"] == "GOOD STANDING"]
         st.dataframe(
             df_eligible[["Volunteer ID", "Full_Name", "Department", "Attendance_Rate"]],
-            use_container_width=True,
+            width=True,
             hide_index=True,
             column_config={
                 "Volunteer ID": st.column_config.TextColumn("ID"),
@@ -332,7 +332,7 @@ with tab_impact:
     st.write("### 📋 Recent Drive Logs")
     st.dataframe(
         df_drives[["Drive ID", "Date", "Location", "Type of Care Home", "Status", "No. of Beneficiaries"]],
-        use_container_width=True,
+        width=True,
         hide_index=True,
         column_config={
             "Date": st.column_config.DateColumn("Drive Date", format="MMM DD, YYYY"),
@@ -370,6 +370,6 @@ with tab_impact:
     
     st.dataframe(
         df_edu_safe,
-        use_container_width=True,
+        width=True,
         hide_index=True
     )
