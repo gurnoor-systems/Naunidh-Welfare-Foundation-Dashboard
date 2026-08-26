@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
 from streamlit_gsheets import GSheetsConnection
 
@@ -30,6 +31,14 @@ def load_and_clean_data():
         # Clean Data Types
         for col in ["Total_Strikes", "Total_Events", "Present"]:
             df_master[col] = pd.to_numeric(df_master[col], errors="coerce").fillna(0)
+
+        # Calculate (Present / Total) * 100. If Total is 0, default to 0 to avoid division errors.
+        import numpy as np
+        df_master["Attendance_Rate"] = np.where(
+            df_master["Total_Events"] > 0,
+            (df_master["Present"] / df_master["Total_Events"]) * 100,
+            0
+        )
 
         # 3. Ingest & Clean Drives Data
         df_drives = fetch(st.secrets["DRIVES_URL"], "Drive_log")
