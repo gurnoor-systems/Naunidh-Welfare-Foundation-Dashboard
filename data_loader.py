@@ -12,11 +12,17 @@ def load_and_clean_data():
         return conn.read(spreadsheet=url, worksheet=sheet_name)
 
     try:
+
         # 2. Ingest Master & Directory Data
         df_master = fetch(st.secrets["ATTENDANCE_URL"], "Strike_Summary")
+        df_master.columns = df_master.columns.str.strip() 
+        
         df_master = df_master[~df_master["Department"].str.contains("Void", case=False, na=False)]
         
         df_dir = fetch(st.secrets["DIRECTORY_URL"], "Volunteer_Directory")
+        df_dir.columns = df_dir.columns.str.strip()
+        
+        # Now it will safely find "Volunteer ID" without trailing spaces breaking it
         df_dir_clean = df_dir[["Volunteer ID", "Contact (Email)"]] 
         
         df_master = pd.merge(df_master, df_dir_clean, on="Volunteer ID", how="left")
