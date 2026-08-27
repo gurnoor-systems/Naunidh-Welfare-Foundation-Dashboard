@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.express as px
 
-def render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey):
+def render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey, df_all_events):
     st.title("Field Operations & Community Impact")
     
     completed_drives = len(df_drives[df_drives["Status"] == "Completed"])
@@ -31,13 +31,21 @@ def render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey):
         )
         st.plotly_chart(fig_loc, use_container_width=True)
     
-    st.write("### 📋 Recent Drive Logs")
+    st.write("### 📋 Unified Foundation Operations Log")
+    st.caption("A consolidated timeline of all field drives, surveys, and teaching sessions.")
+
     st.dataframe(
-        df_drives[["Drive ID", "Date", "Location", "Type of Care Home", "Status", "No. of Beneficiaries"]],
+        df_drives[["Drive ID", "Date", "Department", "Activity Type", "Location", "Impact_Count", "Status"]],
         width="stretch",
         hide_index=True,
         column_config={
-            "Date": st.column_config.DateColumn("Drive Date", format="MMM DD, YYYY")
+            "Drive ID": st.column_config.TextColumn("Event ID", width="small"),
+            "Date": st.column_config.DateColumn("Drive Date", format="MMM DD, YYYY"),
+            "Department": st.column_config.TextColumn("Lead Dept", width="small"),
+            "Activity Type": st.column_config.TextColumn("Activity", width="medium"),
+            "Location": st.column_config.TextColumn("Location", width="medium"),
+            "Impact_Count": st.column_config.NumberColumn("Impact Volume", format="%d", help="Beneficiaries, Families, or Educators Deployed"),
+            "Status": st.column_config.TextColumn("Status", width="small")
         }
     )
 

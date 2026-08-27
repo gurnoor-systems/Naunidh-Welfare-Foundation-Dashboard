@@ -64,9 +64,48 @@ def load_and_clean_data():
         df_edu_log.columns = df_edu_log.columns.str.strip()
         df_edu_log["Date"] = pd.to_datetime(df_edu_log["Date"], errors="coerce")
         df_edu_log = df_edu_log.dropna(subset=["Date"])
+        
+        # 1. Prepare Drives Data
+        df_drives_clean = df_drives[["Drive ID", "Date", "Location", "Status", "No. of Beneficiaries"]].copy()
+        df_drives_clean["Department"] = "Drives"
+        df_drives_clean["Activity Type"] = df_drives["Type of Care Home"]
+        df_drives_clean.rename(columns={"No. of Beneficiaries": "Impact_Count"}, inplace=True)
 
-        return df_master, df_drives, df_edu_safe, df_edu_survey, df_edu_log
+        # 2. Prepare Survey Data
+        # Ensure 'Drive ID' and 'Location' exist, fill missing with placeholders if needed during transition
+        if "Drive ID" not in df_edu_survey.columns: df_edu_survey["Drive ID"] = "N/A"
+        if "Location" not in df_edu_survey.columns: df_edu_survey["Location"] = "Various"
+        
+        # Roll-up Surveys by Drive ID (Summing Families Approached)
+        survey_rollup = df_edu_survey.groupby(["Drive ID", "Date", "Location"], as_index=False).agg(
+            Impact_Count=("Families Approached", "sum")
+        )
+        survey_rollup["Department"] = "Education"
+        survey_rollup["Activity Type"] = "Field Survey"
+        survey_rollup["Status"] = "Completed"
 
+        # 3. Prepare Educating Data
+        if "Drive ID" not in df_edu_log.columns: df_edu_log["Drive ID"] = "N/A"
+        if "Location" not in df_edu_log.columns: df_edu_log["Location"] = "Various"
+        
+        # Roll-up Education Sessions by Drive ID (Counting Active Educators)
+        edu_rollup = df_edu_log.groupby(["Drive ID", "Date", "Location"], as_index=False).agg(
+            Impact_Count=("Educator ID", "nunique") # Impact is the number of active teachers deployed
+        )
+        edu_rollup["Department"] = "Education"
+        edu_rollup["Activity Type"] = "Teaching Session"
+        edu_rollup["Status"] = "Completed"
+
+        # 4. The Merge
+
+        df_all_events = pd.concat([df_drives_clean, survey_rollup, edu_rollup], ignore_index=True)
+        
+        # Sort by most recent dates first
+        df_all_events = df_all_events.sort_values(by="Date", ascending=False)
+
+        # Return the new unified dataframe alongside the others
+        return df_master, df_drives, df_edu_safe, df_edu_survey, df_edu_log, df_all_events
+        
     except Exception as e:
         st.error(f"Failed to load database: {e}")
         st.stop()
