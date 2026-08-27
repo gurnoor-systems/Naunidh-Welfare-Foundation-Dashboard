@@ -32,12 +32,10 @@ def render_dept_ops(df_master):
         df_filtered[["Volunteer ID", "Full_Name", "Contact (Email)", "Department", "Total_Events", "Present", "Attendance_Rate", "SOP_Status"]],
         width="stretch",
         hide_index=True,
+        # NEW: Freeze the first two columns on mobile
         column_config={
             "Volunteer ID": st.column_config.TextColumn("ID", width="small"),
             "Full_Name": st.column_config.TextColumn("Volunteer Name", width="medium"),
-            "Contact (Email)": st.column_config.TextColumn("Email Address", width="medium"),
-            "Total_Events": st.column_config.NumberColumn("Total Events", format="%d 🗓️"),
-            "Attendance_Rate": st.column_config.ProgressColumn("Attendance Rate", format="%.0f%%", min_value=0, max_value=100),
-            "SOP_Status": st.column_config.TextColumn("Standing")
+            "Attendance_Rate": st.column_config.ProgressColumn("Attendance Rate", format="%.0f%%", min_value=0, max_value=100)
         }
     )

@@ -23,9 +23,19 @@ def render_exec_overview(df_master, df_drives, df_edu_safe, df_edu_survey):
         status_counts = df_master["SOP_Status"].value_counts().reset_index()
         status_counts.columns = ["Status", "Count"]
         
-        # Create a sleek Donut Chart
         fig_donut = px.pie(status_counts, values="Count", names="Status", hole=0.5,
                            color_discrete_sequence=["#2ECC71", "#E74C3C"],
                            template="plotly_dark")
-        fig_donut.update_layout(margin=dict(l=0, r=0, t=0, b=0))
-        st.plotly_chart(fig_donut, use_container_width=True)
+        
+        # NEW: Move legend to the bottom for mobile screens
+        fig_donut.update_layout(
+            margin=dict(l=0, r=0, t=10, b=0),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.3,
+                xanchor="center",
+                x=0.5
+            )
+        )
+        st.plotly_chart(fig_donut, width="stretch")

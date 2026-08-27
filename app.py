@@ -16,6 +16,23 @@ from views.field_impact import render_field_impact
 
 st.set_page_config(page_title="NWF Executive Dashboard", page_icon="logo.png", layout="wide")
 
+st.markdown("""
+    <style>
+        /* Reduce top padding to fit more content on mobile screens */
+        .block-container {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        
+        /* Hide the default Streamlit top-right menu for a cleaner app-like feel */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
+
 TIMEOUT_MINUTES = 15
 
 def check_password():
