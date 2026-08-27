@@ -112,7 +112,7 @@ def render_main_dashboard():
     st.divider()
 
     # Data loads instantly from cache
-    df_master, df_drives, df_edu_safe, df_edu_survey, df_edu_log = load_and_clean_data()
+    df_master, df_drives, df_edu_safe, df_edu_survey, df_edu_log, df_all_events = load_and_clean_data()
 
     st.sidebar.header("🎛️ Global Filters")
     date_range = st.sidebar.date_input("📅 Filter by Date Range", (datetime.date(2026, 1, 6), datetime.datetime.now().date()))
@@ -139,7 +139,7 @@ def render_main_dashboard():
     with tab_hr:
         render_hr_monitor(df_master)
     with tab_impact:
-        render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey)
+        render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey, df_all_events)
 
 # Call the fragment function
 render_main_dashboard()
