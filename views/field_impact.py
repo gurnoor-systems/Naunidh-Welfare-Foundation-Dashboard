@@ -18,7 +18,6 @@ def render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey, df_al
         
     st.divider()
     
-    # NEW: Beneficiaries by Location Chart
     if not df_drives.empty:
         loc_data = df_drives.groupby("Location")["No. of Beneficiaries"].sum().reset_index()
         fig_loc = px.bar(
@@ -35,7 +34,7 @@ def render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey, df_al
     st.caption("A consolidated timeline of all field drives, surveys, and teaching sessions.")
 
     st.dataframe(
-        df_drives[["Drive ID", "Date", "Department", "Activity Type", "Location", "Impact_Count", "Status"]],
+        df_all_events[["Drive ID", "Date", "Department", "Activity Type", "Location", "Impact_Count", "Status"]],
         width="stretch",
         hide_index=True,
         column_config={

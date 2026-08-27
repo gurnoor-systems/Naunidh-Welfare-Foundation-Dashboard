@@ -4,8 +4,7 @@ import pandas as pd
 from streamlit_gsheets import GSheetsConnection
 
 @st.cache_data(ttl=300)
-def load_and_clean_data():
-    """Fetches, merges, and cleans all foundation data from Google Sheets."""
+def fetch_all_data():
     
     # 1. Connect to Database
     conn = st.connection("gsheets", type=GSheetsConnection)

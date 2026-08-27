@@ -8,13 +8,13 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from data_loader import load_and_clean_data
+from data_loader import fetch_all_data
 from views.exec_overview import render_exec_overview
 from views.dept_ops import render_dept_ops
 from views.hr_monitor import render_hr_monitor
 from views.field_impact import render_field_impact
 
-st.set_page_config(page_title="NWF Executive Dashboard", page_icon="logo.png", layout="wide")
+st.set_page_config(page_title="NWF Dashboard", page_icon="logo.png", layout="wide")
 
 st.markdown("""
     <style>
@@ -112,7 +112,7 @@ def render_main_dashboard():
     st.divider()
 
     # Data loads instantly from cache
-    df_master, df_drives, df_edu_safe, df_edu_survey, df_edu_log, df_all_events = load_and_clean_data()
+    df_master, df_drives, df_edu_safe, df_edu_survey, df_edu_log, df_all_events = fetch_all_data()
 
     st.sidebar.header("🎛️ Global Filters")
     date_range = st.sidebar.date_input("📅 Filter by Date Range", (datetime.date(2026, 1, 6), datetime.datetime.now().date()))
