@@ -25,7 +25,9 @@ def fetch_all_data():
         df_dir.columns = df_dir.columns.str.strip()
         
         # Now it will safely find "Volunteer ID" without trailing spaces breaking it
-        df_dir_clean = df_dir[["Volunteer ID", "Contact (Email)", "Certificate Status"]] 
+        if "Unit" not in df_dir.columns:
+            df_dir["Unit"] = ""     # fail closed: unit heads see nobody until the column exists
+        df_dir_clean = df_dir[["Volunteer ID", "Contact (Email)", "Certificate Status", "Unit"]] 
         
         df_master = pd.merge(df_master, df_dir_clean, on="Volunteer ID", how="left")
         

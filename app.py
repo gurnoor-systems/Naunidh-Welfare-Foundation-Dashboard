@@ -1,14 +1,13 @@
 import streamlit as st
 import pandas as pd
 import datetime
-import hashlib
-import hmac
 import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from data_loader import fetch_all_data
+from access import require_login, touch_or_expire, scope_master, ROLE_TABS
 from views.exec_overview import render_exec_overview
 from views.dept_ops import render_dept_ops
 from views.hr_monitor import render_hr_monitor
@@ -33,9 +32,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-TIMEOUT_MINUTES = 15
-REQUIRED_SECRETS = ["ADMIN_PASSWORD_HASH", "ATTENDANCE_URL", "DIRECTORY_URL", "DRIVES_URL", "EDU_URL"]
-
+REQUIRED_SECRETS = ["auth", "USERS", "ATTENDANCE_URL", "DIRECTORY_URL", "DRIVES_URL", "EDU_URL"]
 
 def check_secrets():
     """Stop early if any required secret is missing (names go to server logs only)."""
@@ -46,59 +43,8 @@ def check_secrets():
         st.stop()
 
 
-def expire_session():
-    """Wipe the session and leave a flag so the login page can explain why."""
-    st.session_state.clear()
-    st.session_state["session_expired"] = True
-
-
-def touch_or_expire():
-    """Call from inside the fragment so every interaction refreshes or enforces the timeout."""
-    now = datetime.datetime.now()
-    last = st.session_state.get("last_activity")
-    if (not st.session_state.get("password_correct")) or last is None \
-            or (now - last).total_seconds() > TIMEOUT_MINUTES * 60:
-        expire_session()
-        st.rerun(scope="app")
-    st.session_state["last_activity"] = now
-
-
-def check_password():
-    """Validates hashed password and enforces idle timeout."""
-    check_secrets()
-
-    st.session_state.setdefault("password_correct", False)
-    st.session_state.setdefault("last_activity", datetime.datetime.now())
-
-    if st.session_state["password_correct"]:
-        now = datetime.datetime.now()
-        if (now - st.session_state["last_activity"]).total_seconds() > TIMEOUT_MINUTES * 60:
-            expire_session()          # fall through to the login form below
-        else:
-            st.session_state["last_activity"] = now
-            return True
-
-    if st.session_state.pop("session_expired", False):
-        st.warning("⏱️ Session expired due to inactivity. Please log in again.")
-
-    st.write("### 🔒 NWF Executive Dashboard Login")
-    with st.form("login_form"):
-        password = st.text_input("Enter Admin Password", type="password")
-        submitted = st.form_submit_button("Log In")
-
-        if submitted:
-            input_hash = hashlib.sha256(password.encode()).hexdigest()
-            if hmac.compare_digest(input_hash, st.secrets["ADMIN_PASSWORD_HASH"]):
-                st.session_state["password_correct"] = True
-                st.session_state["last_activity"] = datetime.datetime.now()
-                st.rerun()
-            else:
-                st.error("😕 Incorrect password")
-
-    return False
-
-if not check_password():
-    st.stop()
+check_secrets()
+user = require_login()   # stops here unless the person is logged in AND on the allowlist
 
 # ==========================================
 # ISOLATED DASHBOARD FRAGMENT
@@ -107,14 +53,14 @@ if not check_password():
 # widget won't trigger the auth check or top-level script execution again.
 
 @st.fragment
-def render_main_dashboard():
+def render_main_dashboard(user):
     touch_or_expire()
     # ==========================================
     # LOGOUT BUTTON (Top of Sidebar)
     # ==========================================
+    st.sidebar.caption(f"Signed in as {user['email']} ({user['role']})")
     if st.sidebar.button("🚪 Log Out", width="stretch"):
-        st.session_state["password_correct"] = False
-        st.rerun() # Instantly re-runs the script, kicking them to the login screen
+        st.logout()
         
     st.sidebar.divider() # Visual separation from the filters
     
@@ -131,6 +77,7 @@ def render_main_dashboard():
 
     # Data loads instantly from cache
     df_master, df_drives, df_edu_safe, df_edu_survey, df_edu_log, df_all_events = fetch_all_data()
+    df_master = scope_master(df_master, user)   # HODs now only hold their own department
 
     st.sidebar.header("🎛️ Global Filters")
     date_range = st.sidebar.date_input("📅 Filter by Date Range", (datetime.date(2026, 1, 6), datetime.datetime.now().date()))
@@ -154,18 +101,25 @@ def render_main_dashboard():
     else:
         st.sidebar.info("Select both a start and end date to apply the date filter.")
 
-    tab_exec, tab_dept, tab_hr, tab_impact = st.tabs([
-        "📈 Executive Overview", "👥 Department Operations", "⚠️ HR Monitor", "🌍 Field Operations"
-    ])
+    TAB_LABELS = {
+        "exec": "📈 Executive Overview",
+        "dept": "👥 Department Operations",
+        "hr": "⚠️ HR Monitor",
+        "field": "🌍 Field Operations",
+    }
+    allowed = ROLE_TABS[user["role"]]
+    tabs = st.tabs([TAB_LABELS[k] for k in allowed])
 
-    with tab_exec:
-        render_exec_overview(df_master, df_drives, df_edu_safe, df_edu_survey)
-    with tab_dept:
-        render_dept_ops(df_master)
-    with tab_hr:
-        render_hr_monitor(df_master)
-    with tab_impact:
-        render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey, df_all_events)
+    for key, tab in zip(allowed, tabs):
+        with tab:
+            if key == "exec":
+                render_exec_overview(df_master, df_drives, df_edu_safe, df_edu_survey)
+            elif key == "dept":
+                render_dept_ops(df_master)
+            elif key == "hr":
+                render_hr_monitor(df_master)
+            elif key == "field":
+                render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey, df_all_events)
 
 # Call the fragment function
-render_main_dashboard()
+render_main_dashboard(user)

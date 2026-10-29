@@ -28,8 +28,9 @@ def render_dept_ops(df_master):
         fig_scatter.update_xaxes(dtick=1)
         st.plotly_chart(fig_scatter, use_container_width=True)
     
+    wanted = ["Volunteer ID", "Full_Name", "Contact (Email)", "Department", "Total_Events", "Present", "Attendance_Rate", "SOP_Status"]
     st.dataframe(
-        df_filtered[["Volunteer ID", "Full_Name", "Contact (Email)", "Department", "Total_Events", "Present", "Attendance_Rate", "SOP_Status"]],
+        df_filtered[[c for c in wanted if c in df_filtered.columns]],
         width="stretch",
         hide_index=True,
         # NEW: Freeze the first two columns on mobile
