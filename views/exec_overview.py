@@ -1,9 +1,7 @@
 import streamlit as st
 import plotly.express as px
 
-def render_exec_overview(df_master, df_drives, df_edu_safe, df_edu_survey):
-    # ... [Keep your existing metric cards code here] ...
-
+def render_exec_overview(df_master, df_drives, df_edu_safe, df_edu_survey): 
     st.write("### 🏢 Internal Operations Health")
     col_chart1, col_chart2 = st.columns(2)
     

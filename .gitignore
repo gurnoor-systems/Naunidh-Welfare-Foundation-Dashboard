@@ -3,16 +3,21 @@
 .venv
 venv/
 ENV/
+.venv/
 env.bak/
+*service-account*.json
+*credentials*.json
 
 # Streamlit Secrets (CRITICAL: Do not commit this file)
 .streamlit/secrets.toml
+ secrets.toml
 
 # Python Cache
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.pyc
 
 # VS Code / IDEs
 .vscode/

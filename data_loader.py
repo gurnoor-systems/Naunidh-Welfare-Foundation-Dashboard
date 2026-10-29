@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 from streamlit_gsheets import GSheetsConnection
 
+SAFE_EDU_COLS = ["Student ID", "Date", "Age / Grade Level"]
+
 @st.cache_data(ttl=300)
 def fetch_all_data():
     
@@ -23,7 +25,7 @@ def fetch_all_data():
         df_dir.columns = df_dir.columns.str.strip()
         
         # Now it will safely find "Volunteer ID" without trailing spaces breaking it
-        df_dir_clean = df_dir[["Volunteer ID", "Contact (Email)"]] 
+        df_dir_clean = df_dir[["Volunteer ID", "Contact (Email)", "Certificate Status"]] 
         
         df_master = pd.merge(df_master, df_dir_clean, on="Volunteer ID", how="left")
         
@@ -49,8 +51,10 @@ def fetch_all_data():
         # 4. Ingest Education Data & Apply PII Filters
         df_edu = fetch(st.secrets["EDU_URL"], "Student Master File")
         df_edu.columns = df_edu.columns.str.strip()
-        pii_columns = ["Parent/Guardian Contact", "Parents Name", "Address", "Background / Notes"]
-        df_edu_safe = df_edu.drop(columns=pii_columns, errors='ignore').dropna(subset=["Student ID"])
+        missing_edu = [c for c in SAFE_EDU_COLS if c not in df_edu.columns]
+        if missing_edu:
+            raise ValueError(f"Student Master File is missing expected columns: {missing_edu}")
+        df_edu_safe = df_edu[SAFE_EDU_COLS].dropna(subset=["Student ID"]).copy()
 
         # 5. Ingest Survey & Log Data
         df_edu_survey = fetch(st.secrets["EDU_URL"], "Survey Department Log")
