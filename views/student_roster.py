@@ -12,8 +12,14 @@ def render_student_roster(df_students):
         st.info("No student records found.")
         return
 
-    query = st.text_input("Search by student name or ID", "")
-    df = df_students
+    units = sorted(df_students["Unit"].fillna("Unassigned").astype(str).str.strip().unique())
+    c1, c2 = st.columns([2, 1])
+    query = c1.text_input("Search by student name or ID", "")
+    chosen = c2.multiselect("Unit", units, default=units)
+    df = df_students.copy()
+    df["Unit"] = df["Unit"].fillna("Unassigned").astype(str).str.strip()
+    df = df[df["Unit"].isin(chosen)]
+
     if query.strip():
         q = query.strip()
         mask = (
@@ -31,6 +37,7 @@ def render_student_roster(df_students):
             "Student ID": st.column_config.TextColumn("Student ID", width="small"),
             "Student Name": st.column_config.TextColumn("Student Name", width="medium"),
             "Age / Grade Level": st.column_config.TextColumn("Grade", width="small"),
+            "Unit": st.column_config.TextColumn("Unit", width="small"),
             "Educator ID(s)": st.column_config.TextColumn("Educator ID(s)", width="medium"),
         },
     )

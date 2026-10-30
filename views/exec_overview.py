@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+from theme import STATUS_COLORS, STATUS_ORDER
 
 def render_exec_overview(df_master, df_drives, df_edu_safe, df_edu_survey): 
     st.write("### 🏢 Internal Operations Health")
@@ -22,7 +23,8 @@ def render_exec_overview(df_master, df_drives, df_edu_safe, df_edu_survey):
         status_counts.columns = ["Status", "Count"]
         
         fig_donut = px.pie(status_counts, values="Count", names="Status", hole=0.5,
-                           color_discrete_sequence=["#2ECC71", "#E74C3C"],
+                           color="Status", color_discrete_map=STATUS_COLORS,
+                           category_orders={"Status": STATUS_ORDER},
                            template="plotly_dark")
         
         # NEW: Move legend to the bottom for mobile screens

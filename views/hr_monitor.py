@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+from theme import STATUS_COLORS, STATUS_ORDER
 
 # Certificate policy (agreed with leadership)
 MIN_ATTENDANCE = 70            # percent, inclusive
@@ -31,7 +32,8 @@ def render_hr_monitor(df_master):
             names="Status",
             hole=0.4,
             color="Status",
-            color_discrete_map={"GOOD STANDING": "#27AE60", "WARNING": "#F39C12", "STRIKE": "#C0392B"},
+            color_discrete_map=STATUS_COLORS,
+            category_orders={"Status": STATUS_ORDER},
             template="plotly_dark",
             title="Foundation-Wide HR Health"
         )

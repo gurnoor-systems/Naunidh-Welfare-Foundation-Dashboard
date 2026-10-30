@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from streamlit_gsheets import GSheetsConnection
 
-SAFE_EDU_COLS = ["Student ID", "Date", "Age / Grade Level"]
+SAFE_EDU_COLS = ["Student ID", "Date", "Age / Grade Level", "Unit"]
 
 @st.cache_data(ttl=300)
 def fetch_all_data():
@@ -120,7 +120,7 @@ def fetch_all_data():
 # ---------- Student roster: restricted loader ----------
 # Called ONLY for roles allowed to see student names. Never joined into the shared data.
 
-STUDENT_ROSTER_COLS = ["Student ID", "Student Name", "Age / Grade Level", "Educator ID(s)"]
+STUDENT_ROSTER_COLS = ["Student ID", "Student Name", "Age / Grade Level", "Unit", "Educator ID(s)"]
 
 
 @st.cache_data(ttl=300)
