@@ -6,12 +6,13 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from data_loader import fetch_all_data
-from access import require_login, touch_or_expire, scope_master, ROLE_TABS
+from data_loader import fetch_all_data, fetch_student_roster
+from access import require_login, touch_or_expire, scope_master, ROLE_TABS, STUDENT_ROSTER_ROLES
 from views.exec_overview import render_exec_overview
 from views.dept_ops import render_dept_ops
 from views.hr_monitor import render_hr_monitor
 from views.field_impact import render_field_impact
+from views.student_roster import render_student_roster
 
 st.set_page_config(page_title="NWF Dashboard", page_icon="logo.png", layout="wide")
 
@@ -105,6 +106,7 @@ def render_main_dashboard(user):
         "exec": "📈 Executive Overview",
         "dept": "👥 Department Operations",
         "hr": "⚠️ HR Monitor",
+        "students": "🧑‍🎓 Students",
         "field": "🌍 Field Operations",
     }
     allowed = ROLE_TABS[user["role"]]
@@ -118,6 +120,14 @@ def render_main_dashboard(user):
                 render_dept_ops(df_master)
             elif key == "hr":
                 render_hr_monitor(df_master)
+            elif key == "students" and user["role"] in STUDENT_ROSTER_ROLES:
+                try:
+                    df_students = fetch_student_roster()
+                except Exception as e:
+                    print(f"Student roster load failed: {e}", file=sys.stderr)
+                    st.error("The student roster could not be loaded. Please try again or contact the administrator.")
+                else:
+                    render_student_roster(df_students)
             elif key == "field":
                 render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey, df_all_events)
 

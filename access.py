@@ -10,14 +10,15 @@ TIMEOUT_MINUTES = 15
 
 # Which tabs each role may see
 ROLE_TABS = {
-    "leadership": ["exec", "dept", "hr", "field"],
+    "leadership": ["exec", "dept", "hr", "students", "field"],
     "hr":         ["exec", "dept", "hr", "field"],
     "hod":        ["dept", "hr", "field"],
-    "edu_hod":    ["dept", "hr", "field"],
+    "edu_hod":    ["dept", "hr", "students", "field"],
     "unit_head":  ["dept", "hr", "field"],
 }
 DEPT_SCOPED_ROLES = {"hod", "edu_hod", "unit_head"}   # see only their own department's volunteers
 UNIT_SCOPED_ROLES = {"unit_head"}                     # ...and only their own unit within it
+STUDENT_ROSTER_ROLES = {"leadership", "edu_hod"}      # the only roles that may see student names
 
 
 def _load_users():

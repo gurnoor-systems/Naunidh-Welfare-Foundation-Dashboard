@@ -61,6 +61,20 @@ def render_field_impact(df_drives, df_edu_safe, df_edu_log, df_edu_survey, df_al
     with col_edu4.container(border=True):
         st.metric("Teaching Sessions", f"{len(df_edu_log)} 📝")
         
-    st.write("#### 🧑‍🎓 Anonymized Student Roster")
-    st.caption("Privacy Notice: PII strictly masked at the database level.")
-    st.dataframe(df_edu_safe, width="stretch", hide_index=True)
+    st.write("#### 🧑‍🎓 Student Profile (Aggregated)")
+    st.caption("Only aggregate counts are shown here. Individual records are restricted.")
+
+    if not df_edu_safe.empty and "Age / Grade Level" in df_edu_safe.columns:
+        grade_counts = (
+            df_edu_safe["Age / Grade Level"].fillna("Unknown").astype(str).str.strip()
+            .value_counts().reset_index()
+        )
+        grade_counts.columns = ["Age / Grade Level", "Students"]
+        fig_grade = px.bar(
+            grade_counts, x="Age / Grade Level", y="Students",
+            template="plotly_dark", color_discrete_sequence=["#3498DB"],
+            title="Students by Age / Grade Level"
+        )
+        st.plotly_chart(fig_grade, width="stretch")
+    else:
+        st.info("No student data available.")

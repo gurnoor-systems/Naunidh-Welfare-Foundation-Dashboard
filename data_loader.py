@@ -114,3 +114,24 @@ def fetch_all_data():
     except Exception as e:
         st.error(f"Failed to load database: {e}")
         st.stop()
+
+
+
+# ---------- Student roster: restricted loader ----------
+# Called ONLY for roles allowed to see student names. Never joined into the shared data.
+
+STUDENT_ROSTER_COLS = ["Student ID", "Student Name", "Age / Grade Level", "Educator ID(s)"]
+
+
+@st.cache_data(ttl=300)
+def fetch_student_roster():
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    df = conn.read(spreadsheet=st.secrets["EDU_URL"], worksheet="Student Master File")
+    df.columns = df.columns.str.strip()
+
+    missing = [c for c in STUDENT_ROSTER_COLS if c not in df.columns]
+    if missing:
+        raise ValueError(f"Student Master File is missing expected columns: {missing}")
+
+    # Allowlist: parents' names, contact, address, notes and surveyor ID are never loaded.
+    return df[STUDENT_ROSTER_COLS].dropna(subset=["Student ID"]).copy()
